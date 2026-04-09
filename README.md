@@ -1,5 +1,13 @@
-First run Urban_Waste_Project.ipynb in google collab 
-for standardisation and localisation run GEO5017_Bonus_Task .ipynb
+Urban Waste Detection Project
+Overview
+
+This project performs waste detection and classification using deep learning.
+The main pipeline is implemented in a Jupyter Notebook and designed to run efficiently in Google Colab.
+
+Project Structure
+  Urban_Waste_Project.ipynb → Main pipeline (training, evaluation, prediction)
+  GEO5017_Bonus_Task.ipynb → Standardisation and localisation (bonus tasks)
+
 
 Packages required : 
 tensorflow>=2.12

@@ -106,15 +106,3 @@ This directory must contain the **Top-100 detected images** generated from the m
 
 ---
 
-## Notes
-- The project was developed and tested in **Google Colab** for computational efficiency  
-- Ensure Google Drive paths are correctly set before running  
-- GPU runtime is recommended for faster training  
-
----
-
-## Future Improvements (Optional)
-- Compare EfficientNet variants (B0 vs B3)  
-- Integrate YOLO-based detection into main pipeline  
-- Improve class imbalance handling  
-- Add real-time inference support  

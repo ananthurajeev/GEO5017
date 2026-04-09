@@ -37,23 +37,15 @@ Open and run:
 Urban_Waste_Project.ipynb
 
 Execution Steps
-Mount Google Drive & install required libraries
-Load and explore CSV labels
-Build image path mapping (supports subfolders)
-Perform train/validation/test split (stratified)
-Create dataset pipeline with augmentations
-Train EfficientNet-B0
-20 epochs
-Early stopping (patience = 5)
-Best model saved based on waste F1-score
-Evaluate model:
-Confusion matrix
-ROC curve
-Precision–Recall curve
-Threshold analysis
-Predict on ~4,000 unlabeled images
-Export Top-100 waste detections
-For the main pipeline file 
+Mount Google Drive & install libraries
+Load & explore the CSV labels (labels.csv attached in the zip file) 
+Build the image path mapping (handles subfolders)
+Train / Val / Test split (stratified)
+Dataset class + augmentations
+Train EfficientNet-B0 — 20 epochs, early stopping (patience=5), best model saved on waste F1
+Evaluate on test set — confusion matrix, ROC curve, Precision-Recall curve, threshold analysis
+Predict on unlabeled 4,000 images
+Export Top-100 detections
 
 **Step 2 — Standardisation & Localisation (Bonus)**
 

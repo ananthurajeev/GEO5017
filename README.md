@@ -15,7 +15,6 @@ on the UrbanWaste dataset with Focal Loss and a balanced sampling strategy to ha
 ```
 GEO5017_ConvNeXt_Base.ipynb    # Main pipeline (training, evaluation, top-100 prediction)
 README.md
-.gitignore
 ```
 
 ---

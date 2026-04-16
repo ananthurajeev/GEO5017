@@ -1,108 +1,136 @@
-# Urban Waste Detection Project
+# GEO5017 — Urban Waste Detection: ConvNeXt-Base
 
-## Project Overview
-This project performs **waste detection and classification using deep learning**.  
-The main pipeline is implemented in a Jupyter Notebook and optimized for execution in **Google Colab**.
+Binary waste detection in street-level imagery using **ConvNeXt-Base** pretrained on ImageNet-22k.
 
 ---
 
-## Project Structure
+## Repository Structure
+
 ```
-Urban_Waste_Project.ipynb      # Main pipeline (training, evaluation, prediction)
-GEO5017_Bonus_Task.ipynb      # Standardisation and localisation (bonus tasks)
+GEO5017-UrbanWaste-ConvNeXt/
+├── GEO5017_ConvNeXt_Base.ipynb   # Main notebook (run in Google Colab)
+├── README.md
+└── outputs/                      # Generated after running the notebook
+    ├── best_convnext.pt           # Best model checkpoint
+    ├── training_curves.png
+    ├── threshold_tuning.png
+    ├── confusion_val.png
+    ├── test_evaluation.png
+    ├── top100_breakdown.png
+    ├── top20_detections.png
+    ├── errors_fp.png
+    ├── errors_fn.png
+    ├── results.csv
+    ├── results_heatmap.png
+    └── top100_ConvNeXt_Base_submission/
+        ├── top100_ranked.csv
+        └── rank001_score0.xxx_GT1_<filename>.jpg  ...
 ```
 
 ---
 
-## Required Packages
+## Data Setup (Google Drive)
+
+Place your files in Google Drive exactly as shown:
+
 ```
-tensorflow>=2.12
-numpy
-pandas
-matplotlib
-scikit-learn
-Pillow
-tqdm
+MyDrive/
+└── Waste/
+    ├── waste.csv
+    └── UrbanWaste-images-10k-right/
+        ├── year_2016/
+        ├── year_2017/
+        ├── year_2018/
+        ├── year_2019/
+        ├── year_2020/
+        ├── year_2021/
+        ├── year_2022/
+        └── year_2023/
+```
+
+---
+
+## Data Splits
+
+| Split | Years | Role |
+|---|---|---|
+| Train | 2016–2019 | Model training |
+| Val | 2020–2021 | Hyperparameter tuning & early stopping |
+| Test | 2022–2023 | Final held-out evaluation |
+
+---
+
+## Model Architecture
+
+| Component | Detail |
+|---|---|
+| Backbone | `convnext_base.fb_in22k_ft_in1k` via `timm` |
+| Pretraining | ImageNet-22k → fine-tuned on ImageNet-1k |
+| Feature dim | 1024 |
+| Head | LayerNorm → Dropout(0.3) → Linear(1024→256) → GELU → Dropout(0.3) → Linear(256→2) |
+| Parameters | ~87M (fully fine-tuned) |
+
+---
+
+## Training Details
+
+| Setting | Value |
+|---|---|
+| Loss | Focal Loss (γ=2, class-weighted) |
+| Sampler | WeightedRandomSampler — ~50% waste per batch |
+| Backbone LR | 1e-4 |
+| Head LR | 4e-4 |
+| Weight decay | 1e-4 |
+| LR schedule | Linear warm-up (3 epochs) → cosine decay |
+| Max epochs | 30 |
+| Early stop | Patience 7 on val F1 (waste) |
+| Batch size | 32 |
+| Image size | 224×224 |
+
+---
+
+## Running in Google Colab
+
+1. Upload `GEO5017_ConvNeXt_Base.ipynb` to Google Colab (or open from Drive).
+2. Set **Runtime → Change runtime type → GPU**.
+3. Run cells top-to-bottom (Cell 1 → Cell 15).
+4. Outputs are saved to `MyDrive/Waste/`.
+
+---
+
+## Requirements
+
+Installed automatically in Cell 1:
+
+```
+timm
 torch
 torchvision
-transformers
-opencv-python
-ultralytics
-supervision
+tqdm
+scikit-learn
+matplotlib
+seaborn
+Pillow
 ```
 
 ---
 
-## Installation
+## Notebook Cells
 
-Install all required packages using:
-
-```bash
-pip install tensorflow numpy pandas matplotlib scikit-learn Pillow tqdm torch torchvision transformers opencv-python ultralytics supervision
-```
-
----
-
-## How to Run
-
-### Run in Google Colab (Recommended)
-
-1. Upload the notebooks to Google Colab  
-2. Mount your Google Drive:
-   ```python
-   from google.colab import drive
-   drive.mount('/content/drive')
-   ```
-3. Set dataset paths, for example:
-   ```python
-   CSV_PATH = '/content/drive/MyDrive/GEO5017/labels.csv'
-   IMAGES_ROOT = '/content/drive/MyDrive/GEO5017/UrbanWaste-images-10k-right'
-   ```
-
----
-
-### Step 1 — Main Pipeline
-
-Run:
-```
-Urban_Waste_Project.ipynb
-```
-
-#### Execution Steps
-- Mount Google Drive and install libraries  
-- Load and explore the CSV labels: label.csv attached in the zip folder
-- Build image path mapping (handles subfolders)  
-- Perform stratified Train / Validation / Test split  
-- Create dataset class with augmentations  
-- Train EfficientNet-B0:
-  - 20 epochs  
-  - Early stopping (patience = 5)  
-  - Best model saved based on waste F1 score  
-- Evaluate on test set:
-  - Confusion matrix  
-  - ROC curve  
-  - Precision-Recall curve  
-  - Threshold analysis  
-- Predict on 4,000 unlabeled images  
-- Export Top-100 detections  
-
----
-
-### Step 2 — Standardisation & Localisation (Bonus)
-
-Run:
-```
-GEO5017_Bonus_Task.ipynb
-```
-
-#### Prerequisite
-Before running the bonus notebook, ensure:
-
-```
-OUTPUT_DIR/top100_waste_detections/
-```
-
-This directory must contain the **Top-100 detected images** generated from the main pipeline.
-
----
-
+| # | Cell | Description |
+|---|---|---|
+| 1 | Setup | Install packages, imports, random seeds |
+| 2 | Mount Drive & Paths | Mount Google Drive, define all paths |
+| 3 | Load Labels | Read `waste.csv`, map labels, assign year-based splits |
+| 4 | Dataset & Sampler | Augmentation pipelines, `WasteDataset`, `WeightedRandomSampler` |
+| 5 | ConvNeXt-Base Model | Model definition with custom classification head |
+| 6 | Training | Focal Loss, AdamW, LR schedule, early stopping |
+| 7 | Training Curves | Loss, F1/accuracy, and LR plots |
+| 8 | Threshold Optimisation | Sweep decision threshold on val set; PR curve |
+| 9 | Validation Report | Classification report, confusion matrix, P@100 |
+| 10 | Test Evaluation | Full test set metrics, confusion matrix, score histogram |
+| 11 | Top-100 Breakdown | Bar chart of top-100 ranked predictions |
+| 12 | Submission | Copy top-100 images + export `top100_ranked.csv` |
+| 13 | Top-20 Visualisation | Grid of top-20 detections with GT labels |
+| 14 | Error Analysis | False positive and false negative visualisations |
+| 15 | Results Table | Final metric summary + heatmap |

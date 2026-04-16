@@ -64,7 +64,8 @@ MyDrive/
         ├── year_2022/
         └── year_2023/
 ```
-
+> **`waste.csv`** is the labels file provided with the course dataset (included in the submission zip).  
+> Place it directly inside the `Waste/` folder
 Update these paths in **Cell 2** if your Drive folder structure is different:
 
 ```python
